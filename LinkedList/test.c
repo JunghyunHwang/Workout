@@ -16,6 +16,7 @@ void start_test(void)
     const size_t MAX_NUM = MAX;
     int* p_used = s_used_arr;
     int* p_unused = s_unused_arr;
+    node_t* head;
 
     // Randomly generate test data
     srand(time(NULL));
@@ -30,65 +31,83 @@ void start_test(void)
 
     is_init = TRUE;
 
-    test_insert_front();
-    test_insert_back();
-    test_insert_sorted();
-    test_delete_first();
-    test_delete_last();
-    test_find_by_value();
+    head = NULL;
+    test_insert_front(head);
+    destroy(&head);
+
+    assert(head == NULL);
+    test_insert_back(head);
+    destroy(&head);
+
+    assert(head == NULL);
+    test_insert_sorted(head);
+    destroy(&head);
+
+    assert(head == NULL);
+    test_find_by_value(head);
+    destroy(&head);
+
+    assert(head == NULL);
+    test_delete_first(head);
+    destroy(&head);
+
+    assert(head == NULL);
+    test_delete_last(head);
+    destroy(&head);    
 }
 
-void test_insert_front(void)
+void test_insert_front(node_t* head)
 {
     assert(is_init);
-    node_t* head = NULL;
     node_t* next = NULL;
+    int* p_used = s_used_arr;
     size_t i;
 
     for (i = 0; i < DATA_SIZE; ++i) {
-        insert_front(&head, s_used_arr[i]);
+        insert_front(&head, *p_used);
 
-        assert(head->value == s_used_arr[i]);
+        assert(head->value == *p_used);
         assert(head->next == next);
-        next = head;
-    }
 
-    destroy(&head);
-    assert(head == NULL);
+        next = head;
+        ++p_used;
+    }
 }
 
-void test_insert_back(void)
+void test_insert_back(node_t* head)
 {
-    node_t* head = NULL;
+    assert(is_init);
     node_t* last = NULL;
+    int* p_used = s_used_arr;
     size_t i;
 
-    insert_back(&head, s_used_arr[0]);
+    insert_back(&head, *p_used);
     last = head;
-    assert(last->value == s_used_arr[0]);
+    assert(last->value == *p_used);
     assert(last->next == NULL);
 
     for (i = 1; i < DATA_SIZE; ++i) {
-        insert_back(&head, s_used_arr[i]);
+        insert_back(&head, *p_used);
         last = last->next;
-        assert(last != NULL);
-        assert(last->value == s_used_arr[i]);
-        assert(last->next == NULL);
-    }
 
-    destroy(&head);
-    assert(head == NULL);
+        assert(last != NULL);
+        assert(last->value == *p_used);
+        assert(last->next == NULL);
+
+        ++p_used;
+    }
 }
 
-void test_insert_sorted(void)
+void test_insert_sorted(node_t* head)
 {
-    node_t* head = NULL;
+    assert(is_init);
     node_t* p_curr;
     node_t* p_prev;
+    int* p_used = s_used_arr;
     size_t i;
 
     for (i = 0; i < DATA_SIZE; ++i) {
-        insert_sorted(&head, s_used_arr[i]);
+        insert_sorted(&head, *p_used++);
     }
 
     p_curr = head->next;
@@ -100,46 +119,90 @@ void test_insert_sorted(void)
         p_prev = p_curr;
         p_curr = p_curr->next;
     }
-
-    destroy(&head);
-    assert(head == NULL);
 }
 
-void test_delete_first(void)
+
+void test_find_by_value(node_t* head)
 {
-
-}
-
-void test_delete_last(void)
-{
-
-}
-
-void test_delete_by_value(void)
-{
-    node_t* head = NULL;
+    assert(is_init);
+    int* p_used = s_used_arr;
+    int* p_unused = s_unused_arr;
     size_t i;
 
     for (i = 0; i < DATA_SIZE; ++i) {
-        insert_sorted(&head, s_used_arr[i]);
+        insert_front(&head, *p_used++);
     }
-    
-    assert(!delete_by_value(&head, -1));
 
-    assert(delete_by_value(&head, 3));
-    assert(!delete_by_value(&head, 3));
+    p_used = s_used_arr;
 
-    assert(delete_by_value(&head, 2));
-    assert(!delete_by_value(&head, 2));
+    for (i = 0; i < DATA_SIZE; ++i) {
+        assert(find_by_value(&head, *p_used++));
+        assert(!find_by_value(&head, *p_unused++));
+    }
+}
 
-    assert(delete_by_value(&head, 5));
-    assert(!delete_by_value(&head, 5));
+void test_delete_first(node_t* head)
+{
+    assert(is_init);
+    node_t* next;
+    int* p_used = s_used_arr;
+    size_t i;
 
-    destroy(&head);
+    for (i = 0; i < DATA_SIZE; ++i) {
+        insert_front(&head, *p_used++);
+    }
+
+    next = head->next;
+    for (i = 0; i < DATA_SIZE; ++i) {
+        delete_first(&head);
+        assert(head == next);
+        next = head->next;
+    }
+
     assert(head == NULL);
 }
 
-void test_find_by_value(void)
+void test_delete_last(node_t* head)
 {
+    assert(is_init);
 
+    int* p_used = s_used_arr;
+    size_t i;
+
+    for (i = 0; i < DATA_SIZE; ++i) {
+        insert_front(&head, *p_used++);
+    }
+
+    --p_used;
+
+    for (i = DATA_SIZE - 1; i < DATA_SIZE; ++i) {
+        delete_last(&head);
+        assert(!find_by_value(&head, *p_used--));
+    }
+}
+
+void test_delete_by_value(node_t* head)
+{
+    assert(is_init);
+    int* p_used = s_used_arr;
+    int* p_unused = s_used_arr;
+    size_t i;
+
+    for (i = 0; i < DATA_SIZE; ++i) {
+        insert_front(&head, *p_used++);
+    }
+
+    p_used = s_used_arr;
+    for (i = 0; i < DATA_SIZE; ++i) {
+        assert(delete_by_value(&head, *p_used++));
+    }
+
+    p_used = s_used_arr;
+    for (i = 0; i < DATA_SIZE; ++i) {
+        insert_front(&head, *p_used++);
+    }
+
+    for (i = 0; i < DATA_SIZE; ++i) {
+        assert(!delete_by_value(&head, *p_unused++));
+    }
 }

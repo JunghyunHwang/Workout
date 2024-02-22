@@ -49,6 +49,21 @@ void insert_sorted(node_t** pphead, int val)
     *pp = new_node;
 }
 
+int find_by_value(node_t** pphead, int val)
+{
+    node_t** pp = pphead;
+
+    while (*pp != NULL) {
+        if ((*pp)->value == val) {
+            return TRUE;
+        }
+
+        pp = &(*pp)->next;
+    }
+
+    return FALSE;
+}
+
 void delete_first(node_t** pphead)
 {
     node_t* second = (*pphead)->next;
